@@ -1,0 +1,280 @@
+<% content_for :subnav do %>
+  <% if @logged_in.admin?(:edit_profiles) %>
+    <div style="float:right;">
+      <%= link_to 'New Family', new_family_path %>
+    </div>
+  <% end %>
+  <% if @logged_in.can_edit? @person %>
+    <%= render :partial => 'edit_person' %>
+  <% end %>
+  <% unless @me %>
+    <%= render :partial => 'friendship' %>
+    <% if @person.email.to_s.any? and @person.messages_enabled %>
+      <li><%= link_to image_tag('message.gif', :alt => 'Send a Private Message', :class => 'icon') + ' Private Message', send_email_path(:id => @person) %></li>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'photo' %>
+  <%= render :partial => 'families/photo' %>
+  <%= render :partial => 'family' %>
+  <%= render :partial => 'hidden_children' %>
+  <% if Setting.get(:features, :friends) %>
+    <%= render :partial => 'friends' %>
+  <% end %>
+  <% if Setting.get(:features, :sidebar_group_category) %>
+    <%= render :partial => 'sidebar_people' %>
+  <% end %>
+<% end %>
+
+<% unless @person.visible? %>
+  <p class="alert">
+    <%= image_tag('lock.gif', :alt => 'Hidden Profile', :class => 'icon') %>
+    This profile is hidden!
+  </p>
+<% end %>
+
+<% if @me and @logged_in.pending_friendship_requests.count > 0 %>
+  <p class="highlight">
+    You have <%= link_to 'pending friend requests', friends_url %>.
+  </p>
+<% end %>
+
+<% if @show_map %>
+  <div id="map-container" style="width:250px;float:right;display:none;">
+    <div id="map" style="width:250px;height:200px;"></div>
+    <div class="discreet" style="font-size:smaller;text-align:right;">
+      only an approximation |
+      <%= link_to 'show full screen', "http://maps.yahoo.com/broadband/#mvt=m&q1=#{url_encode(@person.family.mapable_address)}", :target => '_new' %>
+    </div>
+  </div>
+<% end %>
+
+<h1>
+  <%=h @person.name %>
+  <% if @logged_in.can_edit? @person %>
+    <%= link_to 'edit', {:action => 'edit', :id => @person}, :style => 'font-size:10pt;color:#999;text-decoration:none;' %>
+  <% end %>
+</h1>
+
+<%= render :partial => 'person_type' %>
+
+<% if @person.pending_updates.count > 0 and @me %>
+  <p>
+    <%= image_tag 'clock.gif', :alt => 'Pending Updates', :class => 'icon' %>
+    The update to your profile is pending approval.
+  </p>
+<% end %>
+
+<% if @prayer_signups.any? %>
+  <p class="highlight" style="width:300px;">
+    <%= @person.first_name %> is praying at the following time(s):<br/>
+    <%= @prayer_signups.map { |s| s.start.strftime '%a %m/%d, %I:%M %p' }.join('<br/>') %>
+    <% if @person != @logged_in %>
+      <br/>
+      <%= link_to 'When are you praying?', :controller => 'prayer', :action => 'event' %>
+    <% end %>
+  </p>
+<% end %>
+
+<%= render :partial => 'details' %>
+
+<% if not @person.messages_enabled? or @person.email.to_s.empty? %>
+  <p style="font-style:italic;">
+    Private messaging is not enabled for <%=h @person.first_name %>.
+  </p>
+<% end %>
+
+<br clear="right"/>
+
+<% if @me %>
+  <h2 class="tab" id="recently">Recently</h2>
+  <div class="section" id="recently_content"></div>
+<% end %>
+
+<h2 class="tab" id="about">About</h2>
+<div class="section" id="about_content">
+  <% if @person.about.to_s.any? %>
+    <%= preserve_breaks @person.about %>
+  <% elsif @me %>
+    <em>Write something <%= link_to 'about yourself', edit_profile_url(:anchor => 'about') %>.</em>
+  <% end %>
+</div>
+
+
+<h2 class="tab" id="testimony">Testimony</h2>
+<div class="section" id="testimony_content">
+  <% if @person.testimony.to_s.any? %>
+    <%= preserve_breaks @person.testimony %>
+  <% elsif @me %>
+    <em>Share <%= link_to 'your story', edit_profile_url(:anchor => 'about') %>.</em>
+  <% end %>
+  <p><%= link_to 'Read more testimonies...', :controller => 'directory', :action => 'search', :testimony => true %></p>
+</div>
+
+<h2 class="tab" id="blog">Blog</h2>
+<div class="section" id="blog_content"></div>
+
+<h2 class="tab" id="favorites">Favorites</h2>
+<div class="section" id="favorites_content">
+  <table>
+    <% if @person.activities.to_s.any? %>
+      <tr><td>Activities:</td><td><%= linkify @person.activities, :activities %></td></tr>
+    <% end %>
+    <% if @person.interests.to_s.any? %>
+      <tr><td>Interests:</td><td><%= linkify @person.interests, :interests %></td></tr>
+    <% end %>
+    <% if @person.music.to_s.any? %>
+      <tr><td>Music:</td><td><%= linkify @person.music, :music %></td></tr>
+    <% end %>
+    <% if @person.tv_shows.to_s.any? %>
+      <tr><td>TV Shows:</td><td><%= linkify @person.tv_shows, :tv_shows %></td></tr>
+    <% end %>
+    <% if @person.movies.to_s.any? %>
+      <tr><td>Movies:</td><td><%= linkify @person.movies, :movies %></td></tr>
+    <% end %>
+    <% if @person.books.to_s.any? %>
+      <tr><td>Books:</td><td><%= linkify @person.books, :books %></td></tr>
+    <% end %>
+    <% if @person.quotes.to_s.any? %>
+      <tr>
+        <td>Quotes:</td>
+        <td>
+          <div style="<%= @person.quotes.to_s.length > 5000 ? 'height:300px;overflow:auto;' : '' %>">
+            <%= preserve_breaks @person.quotes %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+  
+  <% unless has_favs = (@person.activities.to_s.any? or @person.interests.to_s.any? or @person.music.to_s.any? or @person.tv_shows.to_s.any? or @person.movies.to_s.any? or @person.books.to_s.any? or @person.quotes.to_s.any?) or !@me %>
+    <p><em>Tell about your favorite interests, music, movies, and more
+      <%= link_to 'here', edit_profile_url(:anchor => 'favorites') %>.</em></p>
+  <% end %>
+</div>
+
+<% if @person.wall_enabled? %>
+  <h2 class="tab" id="wall">Wall</h2>
+  <div class="section" id="wall_content"></div>
+<% end %>
+
+<h2 class="tab" id="groups">Groups</h2>
+<div class="section" id="groups_content"></div>
+
+<% if Setting.get(:features, :prayer) and @logged_in.admin?(:manage_prayer_signups) %>
+  <%= form_tag :controller => 'prayer', :action => 'event_signup', :id => @person %>
+    Sign up for prayer:
+    <%= text_field_tag 'start', nil %>
+    <%= submit_tag 'Save' %>
+  </form>
+<% end %>
+
+<% unless @me %>
+  <script type="text/javascript">
+  //<![CDATA[
+    function remove_section(name) {
+      Element.remove(name);
+      Element.remove(name + '_content');
+    }
+    <% unless !@me or @person.friendships.count > 0 %>remove_section('recently');<% end %>
+    <% unless @person.about.to_s.any? %>remove_section('about');<% end %>
+    <% unless @person.testimony.to_s.any? %>remove_section('testimony');<% end %>
+    <% unless @person.blog_items_count > 0 %>remove_section('blog');<% end %>
+    <% unless has_favs %>remove_section('favorites');<% end %>
+  //]]>
+  </script>
+<% end %>
+
+<%= javascript_include_tag 'tabs' %>
+<%= stylesheet_link_tag 'tabs' %>
+<style type="text/css">
+  div.section { border-style: solid none none none; }
+</style>
+<script type="text/javascript">
+//<![CDATA[
+  blog_loaded = groups_loaded = wall_loaded = recently_loaded = false;
+  function load_tab(id) {
+    if(id == 'blog') {
+      if(!blog_loaded) {
+        new Ajax.Updater(
+          'blog_content',
+          '<%= url_for(:action => 'blog', :id => @person) %>',
+          {
+            method: 'get',
+            onLoading:function(){$('blog_content').innerHTML='<img src="/images/spinner.gif" class="icon"/>'},
+            onComplete:function(){
+              Element.hide('add_note');
+              Element.show('add_note_link');
+              Element.hide('add_verse');
+              Element.show('add_verse_link');
+            }
+          }
+        );
+        blog_loaded = true;
+      }
+    } else if(id == 'groups') {
+      if(!groups_loaded) {
+        new Ajax.Updater(
+          'groups_content',
+          '<%= url_for(:action => 'groups', :id => @person) %>',
+          {method: 'get', onLoading:function(){$('groups_content').innerHTML='<img src="/images/spinner.gif" class="icon"/>'}}
+        );
+        groups_loaded = true;
+      }
+    } else if(id == 'wall') {
+       if(!wall_loaded) {
+        new Ajax.Updater(
+          'wall_content',
+          '<%= url_for(:action => 'wall', :id => @person) %>',
+          {
+            method: 'get',
+            onLoading:function(){$('wall_content').innerHTML='<img src="/images/spinner.gif" class="icon"/>'},
+            onComplete:function(){Element.hide('wall_message')}
+          }
+        );
+        wall_loaded = true;
+      }
+    } else if(id == 'recently') {
+      if(!recently_loaded) {
+        new Ajax.Updater(
+          'recently_content',
+          '<%= url_for(:action => 'recently') %>',
+          {method: 'get', onLoading:function(){$('recently_content').innerHTML='<img src="/images/spinner.gif" class="icon"/>'}}
+        );
+        recently_loaded = true;
+      }
+    }
+  }
+  set_up(); // tabs
+//]]>
+</script>
+
+<% if @show_map %>
+  <script type="text/javascript" src="http://api.maps.yahoo.com/ajaxymap?v=3.4&amp;appid=<%= Setting.get(:services, :yahoo) %>"></script>
+  <script type="text/javascript">
+    var address = <%= @person.family.mapable_address.inspect %>;
+    map_loaded = false;
+    function load_map() {
+      if(map_loaded) return;
+      map_loaded = true;
+      var ba = new YGeoPoint(36.06,-95.830);
+      var crcc = new YGeoPoint(36.0175,-95.84025);
+      var map = new YMap($('map'));
+      map.drawZoomAndCenter(address, 6);
+      map.addZoomLong();
+      map.setMapType(YAHOO_MAP_REG);
+      var img = new YImage();
+      img.src = '/images/map_marker.gif';
+      img.size = new YSize(16, 28);
+      var marker = new YMarker(address, img);
+      map.addOverlay(marker);
+      map.addTypeControl();
+      //map.panToLatLon(address);
+      map.disableKeyControls();
+    }
+    Element.show('map-container')
+    onload = load_map;
+  </script>
+<% end %>

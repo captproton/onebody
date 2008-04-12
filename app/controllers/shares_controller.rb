@@ -1,0 +1,2 @@
+class SharesController < ApplicationController
+end

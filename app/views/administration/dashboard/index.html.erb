@@ -1,0 +1,57 @@
+<% content_for :sidebar do %>
+  <% if @logged_in.admin?(:manage_access) %>
+    <%= render :partial => 'administrators' %>
+  <% end %>
+<% end %>
+
+<h2>You</h2>
+
+<% if @logged_in.super_admin? %>
+  <p>You are a super administrator (configured in <%= link_to 'settings', settings_url %>).</p>
+<% else %>
+  <p>You have been an administrator since <%= @logged_in.admin.created_at.to_time.to_s :date %>,
+    with the privileges: <%= @privileges.to_sentence %>.</p>
+<% end %>
+
+<% if @logged_in.super_admin? %>
+  <h2>Settings</h2>
+  <p><%= link_to 'Edit settings', settings_url %> for this site.</p>
+<% end %>
+
+<% if @logged_in.admin?(:view_log) %>
+  <h2>Log</h2>
+  
+  <p <% if @flag_count > 0 %>class="very-strong"<% end %>>
+    <%= @flag_count %> flagged <%= @flag_count == 1 ? 'item' : 'items' %>
+  </p>
+  
+  <p><%= link_to 'Click here', :action => 'log' %> to review the log.</p>
+<% end %>
+
+<% if @logged_in.admin?(:manage_updates) %>
+  <h2>Updates</h2>
+  
+  <p <% if @update_count > 0 %>class="very-strong"<% end %>>
+    <%= @update_count %> <%= @update_count == 1 ? 'update' : 'updates' %>
+  </p>
+  
+  <p><%= link_to 'Click here', :action => 'updates' %> to review updates.</p>
+<% end %>
+
+<% if @logged_in.admin?(:manage_groups) %>
+  <h2>Groups</h2>
+  
+  <p <% if @group_count > 0 %>class="very-strong"<% end %>>
+    <%= @group_count %> pending <%= @group_count == 1 ? 'group' : 'groups' %>
+  </p>
+  
+  <p><%= link_to 'Click here', :action => 'updates' %> to review pending groups.</p>
+  
+  <h2>Group Memberships</h2>
+  
+  <p <% if @membership_request_count > 0 %>class="very-strong"<% end %>>
+    <%= @membership_request_count %> pending <%= @membership_request_count == 1 ? 'membership request' : 'membership requests' %>
+  </p>
+  
+  <p><%= link_to 'Click here', :action => 'membership_requests' %> to review pending membership requests.</p>
+<% end %>

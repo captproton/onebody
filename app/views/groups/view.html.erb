@@ -1,0 +1,171 @@
+<% content_for :subnav do %>
+  <li><%= link_to 'List of Groups', :action => 'index' %></li>
+  <% if @logged_in.admin?(:manage_groups) or @group.admin? @logged_in %>
+    <li><%= link_to 'Edit Group', :action => 'edit', :id => @group %></li>
+    <% if not @group.approved and @logged_in.admin?(:manage_groups) %>
+      <li><%= link_to 'Approve Group', {:action => 'approve', :id => @group}, :confirm => 'Are you sure?', :method => 'post', :style => 'color:yellow;' %></li>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'photo' %>
+  <% if not @group.has_photo? and @group.admin?(@logged_in) %>
+    <p><%= link_to 'Upload a Picture', :action => 'edit', :id => @group %></p>
+  <% end %>
+  
+  <% if @group.linked? or @group.parents_of %>
+    <p><em>This group is maintained by church office staff.</em></p>
+  <% elsif not @group.approved %>
+    <p class="very-strong">This group is pending approval.</p>
+  <% else %>
+    <% if @group.membership_requests.count('*', :conditions => ['person_id = ?', @logged_in.id]) > 0 %>
+      <p class="very-strong">You have requested to join this group.</p>
+    <% elsif not @group.people.include? @logged_in %>
+      <p><%= link_to 'Join This Group', {:action => 'join', :id => @group}, :method => 'post', :confirm => @group.admin?(@logged_in) ? nil : 'Are you sure? A request will be sent to the group administrator(s).' %></p>
+    <% elsif not @group.last_admin?(@logged_in) %>
+      <p><%= link_to 'Leave This Group', {:action => 'leave', :id => @group}, :method => 'post', :confirm => 'Are you sure?' %></p>
+    <% end %>
+  <% end %>
+
+  <h2><%= @group.people.length %> <%= @group.people.length == 1 ? 'person' : 'people' %></h2>
+  
+  <%= render :partial => 'people' %>
+<% end %>
+
+<% if @group.private? %>
+  <p class="highlight">
+    <%= image_tag('lock.gif', :alt => 'Private Group', :class => 'icon') %>
+    This group is private. Only people in this group can see its messages.
+  </p>
+<% end %>
+
+<% if @group.hidden? %>
+  <p class="highlight">
+    This group is hidden.
+  </p>
+<% end %>
+
+<% if @group.admin?(@logged_in) and  @group.membership_requests.count > 0 %>
+  <p class="highlight">
+    This group has pending
+    <%= link_to 'group membership requests', :action => 'membership_requests', :id => @group %>.
+  </p>
+<% end %>
+
+<h1><%=h @group.name %></h1>
+
+<p><%=h @group.description %></p>
+
+<table>
+  <% if @group.meets.to_s.any? %>
+    <tr><td>Meets:</td><td><%=h @group.meets %></td></tr>
+  <% end %>
+  <% if @group.location.to_s.any? %>
+    <tr><td>Location:</td><td><%=h @group.location %></td></tr>
+  <% end %>
+  <% if @group.directions.to_s.any? %>
+    <tr><td>Directions:</td><td><%=h @group.directions %></td></tr>
+  <% end %>
+  <% if @group.other_notes.to_s.any? %>
+    <tr><td>Notes:</td><td><%=h @group.other_notes %></td></tr>
+  <% end %>
+</table>
+
+<h2 class="tab" id="blog">Blog</h2>
+<div class="section">
+  <% if @group.can_post? @logged_in %>
+    <p>
+      <%= link_to image_tag('add_small.gif', :alt => 'Add a note.', :class => 'icon') + ' Add a Note', :controller => 'notes', :action => 'edit', :group_id => @group %><br/>
+      <em>Posting a note here does <strong>not</strong> send any email to the group members.</em>
+    </p>
+  <% end %>
+  <% @notes.each do |note| %>
+    <%= render :partial => 'notes/note', :locals => {:note => note} %>
+  <% end %>
+</div>
+
+<h2 class="tab" id="messages">Emails</h2>
+<div class="section">
+  <% if @group.private? and not @group.people.include? @logged_in %>
+    <p><strong>This is a private group. You may not see messages in this group.</strong></p>
+  <% else %>
+    <% if @group.can_post? @logged_in %>
+      <p>
+        <%= link_to image_tag('add_small.gif', :alt => 'New Message', :class => 'icon'), :controller => 'messages', :action => 'edit', :group_id => @group %>
+        <%= link_to 'Send a Message', :controller => 'messages', :action => 'edit', :group_id => @group %><br/>
+        <em>
+          Send a message to everyone in the group at once.
+          <% if @group.address.to_s.any? %>
+            <br/>
+            You can also do this by sending email to <%= mail_to @group.full_address, @group.full_address %>.
+          <% end %>
+        </em>
+      </p>
+    <% end %>
+    <% if @messages.any? %>
+      <table>
+        <% @messages.each do |message| %>
+          <tr>
+            <td>
+              <%= link_to image_tag('comment.gif', :alt => 'Message', :class => 'icon'), :controller => 'messages', :action => 'view', :id => message %>
+              <%= link_to h(message.subject), :controller => 'messages', :action => 'view', :id => message %>
+            </td>
+            <td>
+              <%=h message.person.name %>
+            </td>
+            <td><%= message.created_at.strftime '%m/%d/%Y %I:%M %p' %></td>
+            <td>
+              <% if (r = message.reply_count.to_i) > 0 %>
+                <%= r %> <%= r == 1 ? 'reply' : 'replies' %>
+              <% end %>
+            </td>
+            <td>
+              <% if message.attachment_count.to_i > 0 %>
+                <%= message.attachment_count %> <%= message.attachment_count.to_i == 1 ? 'attachment' : 'attachments' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    <% else %>
+      <p><em>No messages yet.</em></p>
+    <% end %>
+  <% end %>
+</div>
+
+<h2 class="tab" id="prayerrequests">Prayer Requests</h2>
+<div class="section">
+  <% if @group.people.include? @logged_in %>
+    <p>
+      <%= link_to image_tag('add_small.gif', :alt => 'Add a prayer request.', :class => 'icon') + ' Add a Prayer Request', new_prayer_request_url(:group_id => @group) %><br/>
+      <em>Prayer requests are private to this group.</em>
+    </p>
+    <% if @prayer_requests.length > 0 %>
+      <% @prayer_requests.each do |req| %>
+        <%= render :partial => 'prayer_requests/prayer_request', :locals => {:req => req} %>
+      <% end %>
+    <% else %>
+      <p><em>no prayer requests</em></p>
+    <% end %>
+    <% if @answered_prayer_count > 0 %>
+      <p>
+        <%= @answered_prayer_count %> answered <%= @answered_prayer_count == 1 ? 'prayer' : 'prayers' %><br/>
+        <%= link_to 'View Answered Prayers &raquo;', :controller => 'prayer_requests', :action => 'answered', :id => @group %>
+      </p>
+    <% end %>
+  <% else %>
+    <p><em>Only members of this group can read and add prayer requests.</em></p>
+  <% end %>
+</div>
+
+<%= javascript_include_tag 'tabs' %>
+<%= stylesheet_link_tag 'tabs' %>
+<style type="text/css">
+  div.section { border-style: solid none none none; }
+</style>
+<script type="text/javascript">
+//<![CDATA[
+  set_up(); // tabs
+//]]>
+</script>

@@ -1,0 +1,63 @@
+<%= javascript_include_tag 'tiny_mce/tiny_mce.js' %>
+<script type="text/javascript">
+  tinyMCE.init({
+  	mode: "exact",
+  	elements: "recipe_ingredients,recipe_directions",
+  	theme: "simple",
+  	convert_newlines_to_brs : true,
+  	invalid_elements: "pre,font"
+  });
+</script>
+
+<h1>Edit Recipe</h1>
+<%= form_tag( {:action=> "edit", :id => @recipe.id}, :multipart => true )%>
+  <div id="picture-upload">
+    <div style="text-align:center;">
+      <strong>Picture of Your Dish</strong><br/>
+      <% if @recipe.has_photo? %>
+        <%= image_tag(url_for(:action => 'photo', :id => "#{@recipe.id}.medium.jpg"), :alt => @recipe.title) %><br/>
+        <%= link_to "Remove Picture",
+          {:action => 'edit', :photo => 'remove'},
+          :method => 'post',
+          :confirm => 'Are you sure?' %>
+      <% end %>
+    </div>
+    <%= render :partial => 'people/photo_fields', :locals => {:object => @recipe, :name => 'Picture of Dish', :url => {:controller => 'recipes', :action => 'edit'}} %>
+  </div>
+  <label for="recipe_title">Title:</label>
+  <%= text_field "recipe", "title" %><br/>
+  <label for="recipe_tags">Tags:</label>
+  <%= text_field_tag "tag_string", @recipe.tags.map { |t| t.name }.join(' ') %><br/>
+  <label for="recipe_serving_size">Serving Size:</label>
+  <%= select "recipe", "serving_size", 1..100 %><br/>
+  <table>
+  <tr>
+  <td>
+  <label for="recipe_event_id">Add this recipe to an Event?</label>
+  <select name="recipe[event_id]" id="recipe[event_id]">
+    <option value="">None selected</option>
+    <%= options_for_select(Event.find(:all, :order => '"when" desc').map { |e| ["#{e.name} (#{e.when.strftime('%m/%d/%Y') rescue '???'})", e.id]}, @recipe.event_id) %>
+  </select>
+  </td>
+  </tr>
+  <tr>
+  <td class="tip"><b>Did you know?</b><br/>You can now add recipes to an event.  Just pick the event from the drop down
+  box above, and voila!
+  </td>
+  </tr>
+  </table>
+  <label for="recipe_description">Description:</label>
+  <%= text_area "recipe", "description", :rows => 3 %><br/>
+  <label for="recipe_prep">Prep/Cook Time:</label>
+  <%= text_field "recipe", "prep" %><br/>
+  <label for="recipe_bake">Bake Time:</label>
+  <%= text_field "recipe", "bake" %><br/>
+  <label for="recipe_ingredients">Ingredients:</label>
+  <%= text_area "recipe", "ingredients", :rows => 10 %><br/>
+  <label for="recipe_directions">Directions:</label>
+  <%= text_area "recipe", "directions", :rows => 10 %><br/>
+  <label for="recipe_notes">Other Notes:</label>
+  <%= text_area "recipe", "notes", :rows => 3 %><br/>
+  <br/>
+  <%= submit_tag 'Save Recipe' %>
+</form>

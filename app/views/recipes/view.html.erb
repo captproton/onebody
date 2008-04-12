@@ -1,0 +1,85 @@
+<% content_for :subnav do %>
+  <%= link_to "All Recipes", :controller => "recipes", :action => "index" %>
+  <% if @recipe.admin? @logged_in %>
+    <%= link_to 'Edit Recipe', :action => 'edit', :id => @recipe %>
+  <% end %>
+  <%= link_to 'New Recipe', :controller => 'recipes', :action => 'edit' %>
+<% end %>
+
+<% if @recipe.has_photo? %>
+  <div style="width:200;float:right;">
+    <%= image_tag(url_for(:action => 'photo', :id => "#{@recipe.id}.medium.jpg"), :alt => @recipe.title) %>
+  </div>
+<% end %>
+
+<h1><%=h @recipe.title %></h1>
+<p class="below-h1">
+  Added by:
+  <% if @recipe.person %>
+    <%= link_to h(@recipe.person.name), :controller => 'people', :action => 'view', :id => @recipe.person %>
+  <% else %>
+    ???
+  <% end %>
+  <%=h @recipe.created_at.strftime 'on %m/%d/%Y at %I:%M %p' %>
+</p>
+  
+<table>
+  <tr>
+    <td style="white-space:nowrap;">Tags:</td>
+    <td>
+      <%= form_tag({:action => 'add_tags', :id => @recipe}, :style => 'border:none;padding:0;margin:0;') %>
+        <%= render :partial => 'tags/tags_with_delete', :locals => {:object => @recipe} %>
+        Add tags: <%= text_field_tag :tag_string, nil, :style => 'width:125px;margin:0;' %>
+      </form>
+    </td>
+  </tr>
+  <tr>
+    <td style="white-space:nowrap;">Serving Size:</td>
+    <td><%=h @recipe.serving_size %></td>
+  </tr>
+  <% if @recipe.event_id.to_s.any? %>
+    <tr>
+      <td style="white-space:nowrap;">Event:</td>
+      <td><%= link_to @recipe.event.name,
+                      :controller => 'events',
+                      :action => 'view',
+                      :id => @recipe.event,
+                      :anchor => 'recipes' %></td>
+    </tr>
+  <% end %>
+  <% if @recipe.prep.to_s.any? %>
+    <tr>
+      <td style="white-space:nowrap;">Prep/Cook Time:</td>
+      <td><%=h @recipe.prep %></td>
+    </tr>
+  <% end %>
+  <% if @recipe.bake.to_s.any? %>
+    <tr>
+      <td style="white-space:nowrap;">Bake Time:</td>
+      <td><%=h @recipe.bake %></td>
+    </tr>
+  <% end %>
+  <% if @recipe.description.to_s.any? %>
+    <tr>
+      <td style="white-space:nowrap;">Description:</td>
+      <td><%=h @recipe.description %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td style="white-space:nowrap;">Ingredients:</td>
+    <td><%= white_list @recipe.ingredients %></td>
+  </tr>
+  <tr>
+    <td style="white-space:nowrap;">Directions:</td>
+    <td><%= white_list @recipe.directions %></td>
+  </tr>
+  <% if @recipe.notes.to_s.any? %>
+    <tr>
+      <td style="white-space:nowrap;">Other Notes:</td>
+      <td><%=h @recipe.notes %></td>
+    </tr>
+  <% end %>
+</table>
+
+<h2>Comments</h2>
+<%= render :partial => 'comments/comments', :locals => {:comments => @recipe.comments, :params => {:recipe_id => @recipe}, :intro => 'about this recipe.'} %>

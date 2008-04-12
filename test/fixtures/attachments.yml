@@ -1,0 +1,17 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: attachments
+#
+#  id           :integer       not null, primary key
+#  message_id   :integer       
+#  name         :string(255)   
+#  file         :binary(104857 
+#  content_type :string(50)    
+#  created_at   :datetime      
+#  song_id      :integer       
+#  site_id      :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+

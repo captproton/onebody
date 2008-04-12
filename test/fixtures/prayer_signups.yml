@@ -1,0 +1,16 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: prayer_signups
+#
+#  id         :integer       not null, primary key
+#  person_id  :integer       
+#  start      :datetime      
+#  created_at :datetime      
+#  reminded   :boolean       
+#  other      :string(100)   
+#  site_id    :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+

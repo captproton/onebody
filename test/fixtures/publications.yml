@@ -1,0 +1,15 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: publications
+#
+#  id          :integer       not null, primary key
+#  name        :string(255)   
+#  description :text          
+#  created_at  :datetime      
+#  file        :string(255)   
+#  updated_at  :datetime      
+#  site_id     :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html

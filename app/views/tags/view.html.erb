@@ -1,0 +1,20 @@
+<h1>Tag: <%=h @tag.name %></h1>
+
+<%= render :partial => 'shares/subnav' %>
+
+<% if @tag.verses.any? %>
+  <h2>Verses</h2>
+  <% @tag.verses.each do |verse| %>
+    <%= render :partial => 'verses/verse', :locals => {:verse => verse} %>
+  <% end %>
+<% end %>
+
+<% if @tag.recipes.any? %>
+  <h2>Recipes</h2>
+  <%= render :partial => 'recipes/list', :locals => {:recipes => @tag.recipes} %>
+<% end %>
+
+<% if @tag.songs.any? %>
+  <h2>Songs</h2>
+  <%= render :partial => 'music/list', :locals => {:songs => @tag.songs} %>
+<% end %>

@@ -1,0 +1,36 @@
+<p>OneBody is running in setup mode. Once you are happy with the configuration,
+  you can run OneBody for real with:<br/>
+  <code style="color:#00f;">ruby script/server -e <%= session[:setup_environment] %></code></p>
+
+<% if @info.up_to_date.nil? %>
+  <h2 class="status">Files</h2>
+  <p>This instance of OneBody is at version <%= @info.this_version %>.
+    For help upgrading, visit <a href="http://github.com/seven1m/onebody/wikis/UpgradeOneBody">UpgradeOneBody</a>
+    on the wiki.</p>
+<% elsif @info.up_to_date %>
+  <h2 class="status">Files: <strong class="go">Up-to-date</strong> <%= image_tag 'checkmark.png', :alt => 'Up-to-date', :class => 'icon' %></h2>
+  <p>Your instance of OneBody is up-to-date.</p>
+<% else %>
+  <h2 class="status">Files: <strong class="stop">Need To Upgrade</strong></h2>
+  <p>This instance of OneBody seems out of date. For help upgrading, visit
+    <a href="http://github.com/seven1m/onebody/wikis/UpgradeOneBody">UpgradeOneBody</a> on the wiki.</p>
+  <% if @info.git_install_method? %>
+    <p>(Since this instance of OneBody is installed via Git glone, this may simply indicate that
+      you committed changes and some of your files are different than the official revision
+      of OneBody. That's OK.)</p>
+  <% end %>
+<% end %>
+
+<p><%= link_to "Click here", setup_environment_url %> to see detailed information about
+  your current running version, available versions, and other information.</p>
+
+<%= render :partial => 'setup/database/version' %>
+
+<%= render :partial => 'setup/database/data_status' %>
+
+<hr/>
+<p><em>Warnings below this line will not affect local usage of OneBody for development and/or testing purposes.</em></p>
+
+<%= render :partial => 'setup/sites/status' %>
+
+<%= render :partial => 'scheduler_status' %>

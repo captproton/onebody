@@ -1,0 +1,14 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: setlists
+#
+#  id         :integer       not null, primary key
+#  start      :datetime      
+#  person_id  :integer       
+#  created_at :datetime      
+#  site_id    :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+

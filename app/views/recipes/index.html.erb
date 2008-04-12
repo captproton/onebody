@@ -1,0 +1,40 @@
+<div id="search">
+  <%= form_tag({:controller => 'recipes', :action => 'search'}) %>
+	  <input name="criteria" id="recipe_search_name" onfocus="if(this.value == 'Recipe Search') this.value = ''" onblur="if(this.value == '') this.value = 'Recipe Search'"/>
+	</form>
+	<script type="text/javascript"> $('recipe_search_name').value = 'Recipe Search' </script>
+</div>
+
+<h1>Recipes</h1>
+
+<p>Share your favorite recipes with the <%= Setting.get(:name, :church) %> family.</p>
+
+<%= render :partial => 'shares/subnav' %>
+
+<% content_for :sidebar do %>
+
+  <h2>Tags</h2>
+  <% if @tags.any? %>
+    <div class="tag-cloud">
+      <% @tags.each do |tag| %>
+        <% begin %>
+          <span style="font-size:<%= tag.recipes.count * @factor + 9 %>pt;">
+            <%= link_to h(tag.name), {:controller => 'tags', :action => 'view', :id => tag.name}, :style => 'text-decoration:none;' %>
+          </span>
+        <% rescue %>
+          <!-- tag error -->
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p><em>No tags yet!</em></p>
+  <% end %>
+<% end %>
+
+<% if @recipes.any? %>
+  <%= render :partial => 'list', :locals => {:recipes => @recipes} %>
+<% else %>
+  <p><em>No recipes yet!</em></p>
+<% end %>
+
+<p><%= link_to image_tag('add_small.gif', :alt => 'Add a recipe.', :class => 'icon') + ' New Recipe', :controller => "recipes", :action => "edit" %></p>

@@ -1,0 +1,42 @@
+<%= render :partial => 'shares/subnav' %>
+
+<% content_for :sidebar do %>
+  <h1><%= link_to h(@picture.event.name), :controller => 'events', :action => 'view', :id => @picture.event %></h1>
+  <% if @picture.event.when %>
+    <p class="below-h1"><%= @picture.event.when.strftime '%B %d, %Y %I:%M %p' %></p>
+  <% end %>
+  <% if @picture.person %>
+    <p>
+      Picture uploaded by:<br/>
+      <%= link_to h(@picture.person.name), :controller => 'people', :action => 'view', :id => @picture.person %><br/>
+      <%= @picture.created_at.strftime '%m/%d/%Y %I:%M %p' %>
+    </p>
+  <% end %>
+  <% if @picture.event.admin?(@logged_in) %>
+    <p>
+      Rotate:
+      <%= link_to 'Left', {:action => 'rotate', :id => @picture, :degrees => -90}, :confirm => 'Are you sure?', :method => 'post' %> |
+      <%= link_to 'Right', {:action => 'rotate', :id => @picture, :degrees => 90}, :confirm => 'Are you sure?', :method => 'post' %><br/>
+      <%= link_to 'Make Cover for Event', {:action => 'select_event_cover', :id => @picture}, :method => 'post' %><br/>
+      <%= link_to 'Delete Picture', {:action => 'delete', :id => @picture}, :confirm => 'Are you sure?', :method => 'post' %>
+    </p>
+  <% end %>
+<% end %>
+
+<p>
+  <%= link_to '&laquo; prev', :action => 'prev', :id => @picture %>
+  |
+  <%= link_to 'next &raquo;', :action => 'next', :id => @picture %>
+</p>
+
+<p>
+  <%= link_to image_tag(url_for(:action => 'photo', :id => "#{@picture.id}.large.jpg"), :alt => 'click to see full size'),
+    :action => 'photo', :id => "#{@picture.id}.jpg" %>
+</p>
+
+<!-- updates all the sizes on a refresh -->
+<div style="display:none;">
+  <%= image_tag url_for(:action => 'photo', :id => "#{@picture.id}.medium.jpg"), :alt => 'refresh' %>
+  <%= image_tag url_for(:action => 'photo', :id => "#{@picture.id}.small.jpg"), :alt => 'refresh' %>
+  <%= image_tag url_for(:action => 'photo', :id => "#{@picture.id}.tn.jpg"), :alt => 'refresh' %>
+</div>

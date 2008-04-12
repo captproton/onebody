@@ -1,0 +1,63 @@
+<h1><%= @person.name_possessive %> Friends</h1>
+
+<% if @pending.any? %>
+  <div class="highlight">
+    <h2>Pending Friend Requests</h2>
+    <p>The following people have requested to be your friend. Click <em>Accept</em> or <em>Decline</em>.</p>
+    <table>
+      <% @pending.each do |friendship_request| %>
+        <tr>
+          <td>
+            <a href="<%= url_for person_url(:id => friendship_request.from) %>">
+              <%= render :partial => 'people/thumbnail', :locals => {:person => friendship_request.from} %>
+            </a>
+          </td>
+          <td>
+            <%= link_to friendship_request.from.name, person_url(:id => friendship_request.from) %>
+            <br/>
+            <strong>
+              <%= link_to image_tag('contact_add.gif', :alt => 'Accept Friend', :class => 'icon') + ' Accept', {:action => 'accept', :id => friendship_request}, :method => :post, :style => 'text-decoration:none;' %><br/>
+              <%= link_to image_tag('remove.gif', :alt => 'Decline Friend', :class => 'icon') + ' Decline', {:action => 'decline', :id => friendship_request}, :method => :post, :confirm => 'Are you sure?', :style => 'text-decoration:none;' %>
+            </strong>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+<% end %>
+
+<% if @friendships.any? %>
+  <% if @friendships.length > 1 %>
+    <p>You can rearrange your friends list by clicking on the
+    <%= image_tag 'reorder.png', :alt => 'Reorder', :class => 'icon' %> icon and
+    dragging it up/down with your mouse.
+    (The top <%= MAX_FRIENDS_ON_PROFILE %> friends show on your profile page.)</p>
+  <% end %>
+  <ul id="friends" style="list-style-type:none;">
+    <% @friendships.each do |friendship| %>
+      <li id="friendship_<%= friendship.id %>">
+        <a href="<%= url_for person_url(:id => friendship.friend) %>">
+          <%= render :partial => 'people/thumbnail', :locals => {:person => friendship.friend} %>
+        </a>
+        <%= link_to friendship.friend.name, person_url(:id => friendship.friend) %>
+        (added <%= friendship.created_at.to_time.to_s %>)
+        <% if @logged_in == @person %>
+          <% if @friendships.length > 1 %><%= image_tag 'reorder.png', :alt => 'Reorder this list by dragging.', :class => 'handle icon' %><% end %>
+          <%= link_to '[remove]', {:action => 'remove', :id => friendship.friend}, :class => 'discreet', :method => :post, :confirm => 'Are you sure?' %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  
+  <% if @logged_in == @person %>
+    <%= sortable_element 'friends', :url => {:action => 'reorder'}, :handle => 'handle' %>
+  <% end %>
+<% else %>
+  <p>
+    Nobody yet!
+    <% if @logged_in == @person %>
+      You can find your friends by browsing
+      <%= link_to 'the directory', search_friends_path %>.
+    <% end %>
+  </p>
+<% end %>

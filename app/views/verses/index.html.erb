@@ -1,0 +1,42 @@
+<h1>Verses</h1>
+
+<%= render :partial => 'shares/subnav' %>
+
+<p>Share your favorite Bible verses with the <%= Setting.get(:name, :church) %> family.</p>
+
+<%= render :partial => 'add_verse' %>
+
+<% content_for :sidebar do %>
+  <h2>Tags</h2>
+  <% if @tags.any? %>
+    <div class="tag-cloud">
+      <% @tags.each do |tag| %>
+        <% begin %>
+          <span style="font-size:<%= tag.verses.count * @factor + 9 %>pt;">
+            <%= link_to h(tag.name), {:controller => 'tags', :action => 'view', :id => s(tag.name)}, :style => 'text-decoration:none;' %>
+          </span>
+        <% rescue %>
+          <!-- tag error -->
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p><em>No tags yet!</em></p>
+  <% end %>
+<% end %>
+
+<% if @pages.length > 1 %>
+  <p class="page-nav">Page: <%= pagination_links @pages, :window_size => 5, :params => params %></p>
+<% end %>
+
+<% if @verses.any? %>
+  <% @verses.each do |verse| %>
+    <%= render :partial => 'verses/verse', :locals => {:verse => verse} %>
+  <% end %>
+<% else %>
+  <p><em>No verses yet!</em></p>
+<% end %>
+
+<% if @pages.length > 1 %>
+  <p class="page-nav">Page: <%= pagination_links @pages, :window_size => 5, :params => params %></p>
+<% end %>

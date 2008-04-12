@@ -1,0 +1,13 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: performances
+#
+#  id         :integer       not null, primary key
+#  setlist_id :integer       
+#  song_id    :integer       
+#  ordering   :integer       
+#  site_id    :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html

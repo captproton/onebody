@@ -1,0 +1,16 @@
+# == Schema Information
+# Schema version: 4
+#
+# Table name: workers
+#
+#  id          :integer       not null, primary key
+#  ministry_id :integer       
+#  person_id   :integer       
+#  start       :datetime      
+#  end         :datetime      
+#  remind_on   :datetime      
+#  reminded    :boolean       
+#  site_id     :integer       
+#
+
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
