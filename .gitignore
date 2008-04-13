@@ -1,4 +1,5 @@
 log/*.log
+log/locomotive.pid
 db/*.db
 tmp
 pkg
@@ -12,3 +13,5 @@ db/*.backup.*
 Scheduler.pid
 config/deploy.rb
 config/database.yml
+config/locomotive.yml
+vendor/rails
